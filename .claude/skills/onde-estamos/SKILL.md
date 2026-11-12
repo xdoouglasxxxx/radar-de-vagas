@@ -1,5 +1,5 @@
 ---
-name: status
+name: onde-estamos
 description: Mostra onde o projeto está no roadmap, o que falta e a próxima ação. Com o argumento "atualizar", propõe e grava a atualização de docs/STATUS.md.
 argument-hint: "[atualizar]"
 disable-model-invocation: true
