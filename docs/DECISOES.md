@@ -20,6 +20,7 @@ Decisões vigentes. Para mudar uma delas, o usuário pede e a mudança é regist
 | D14 | Segredos só em Secrets do GitHub, do Codespaces e do Wrangler; `.env*` nunca é lido nem escrito pelo Claude | Repositório público |
 | D15 | Merge em `main` só por pull request, com CI verde e aprovação do usuário | Checkpoints |
 | D16 | Nesta máquina, as regras de permissão do projeto são ignoradas (somente regras gerenciadas). As proteções efetivas são a proteção da branch main, o secret scanning e os checkpoints. | Configuração gerenciada da máquina corporativa |
+| D17 | No CP0, se o `juiz-escopo` aprovar o plano (sem bloqueante e sem decisão pendente para o usuário) e nenhuma parada obrigatória se aplicar, o Claude pode implementar sem esperar a aprovação do usuário. Merge, segredo, deploy, recurso em nuvem, migration destrutiva e dependência nova continuam exigindo o usuário | Reduz pausas em tarefas rotineiras sem abrir mão dos juízes e do merge |
 
 ## Gatilho de revisão
 Primeiro usuário externo, primeira cobrança ou primeiro recrutador interessado: revisar D02, D03, D06, D13, os termos dos planos gratuitos e a LGPD (com apoio jurídico).

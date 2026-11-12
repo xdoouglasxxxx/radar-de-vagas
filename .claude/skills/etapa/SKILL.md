@@ -23,10 +23,18 @@ Divida a etapa em tarefas pequenas. Para a primeira tarefa, apresente:
 - dependências novas, se houver, com justificativa;
 - ações que só o usuário pode fazer (segredos, console de nuvem).
 
-Peça ao subagente `juiz-escopo` uma revisão do plano. Depois **pare e espere a aprovação do usuário**. Não escreva código antes disso.
+Peça ao subagente `juiz-escopo` uma revisão do plano e mostre ao usuário o plano e o veredito.
+
+**Aprovação automática (D17).** Pode seguir para a implementação sem esperar o usuário somente se **todas** estas condições valerem:
+- o veredito do `juiz-escopo` é `APROVADO` ou `APROVADO COM RESSALVAS`, sem achado bloqueante;
+- a seção "decisões que precisam do usuário" do juiz está vazia;
+- o plano cumpre o objetivo da etapa no `ROADMAP.md` e não contraria `docs/DECISOES.md`;
+- nenhuma das "Paradas obrigatórias" de `docs/CHECKPOINTS.md` se aplica (segredo ou credencial, deploy, recurso em nuvem, mudança em `main`, migration destrutiva, dependência nova, limite, preço ou termo não verificado).
+
+Se qualquer condição falhar, **pare e espere a aprovação do usuário** antes de escrever código. Se o juiz reprovar, corrija o plano e peça nova revisão (no máximo duas rodadas); depois disso, pare.
 
 ## 3. Implementar (CP1)
-Crie a branch `etapa/<id>-<descricao-curta>` e delegue a tarefa ao subagente `developer`, com o plano aprovado.
+Crie a branch `etapa/<id>-<descricao-curta>` e delegue a tarefa ao subagente `developer`, com o plano aprovado (pelo usuário ou pela regra de aprovação automática do passo 2).
 
 ## 4. Julgar (CP2)
 Acione os subagentes `juiz-seguranca`, `juiz-qualidade` e `juiz-escopo` sobre `git diff main...HEAD`. Mostre os três vereditos ao usuário, sem resumir achados bloqueantes.

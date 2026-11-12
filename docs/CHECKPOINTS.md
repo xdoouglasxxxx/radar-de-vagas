@@ -4,7 +4,7 @@ Toda tarefa passa por estes portões, em ordem. Um portão reprovado devolve a t
 
 | Portão | O que é | Quem decide |
 |---|---|---|
-| **CP0 — Plano** | Plano curto: objetivo, arquivos tocados, testes previstos, riscos, dependências novas (se houver) | Usuário aprova |
+| **CP0 — Plano** | Plano curto: objetivo, arquivos tocados, testes previstos, riscos, dependências novas (se houver) | `juiz-escopo` aprova; o usuário aprova nas paradas obrigatórias (D17) |
 | **CP1 — Implementação** | Código e testes em branch `etapa/E<n>-...`; checagens locais leves passam | developer |
 | **CP2 — Juízes** | Veredito dos três juízes sobre o diff | juízes |
 | **CP3 — CI** | Pull request aberto e CI verde, sem testes pulados que deveriam rodar | GitHub Actions |
