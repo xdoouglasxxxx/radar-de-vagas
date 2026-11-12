@@ -1,0 +1,38 @@
+# Segredos e dados pessoais: NUNCA commitar (repositório público)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# CVs e dados reais. Só fixtures fictícias em tests/fixtures/ (marcadas como sintéticas)
+cvs_reais/
+uploads/
+*.dump
+*.sql.gz
+*.enc
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Node / Cloudflare
+node_modules/
+.wrangler/
+.dev.vars
+.next/
+
+# Editor / SO
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db

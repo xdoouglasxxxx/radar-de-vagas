@@ -1,0 +1,15 @@
+name = "radar-auth"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+
+# Segredos (NUNCA aqui): wrangler secret put GOOGLE_CLIENT_SECRET / DATABASE_URL
+# Em dev local use .dev.vars (ignorado pelo git).
+[vars]
+APP_ORIGIN = "http://localhost:3000"
+TERMS_VERSION = "2026-11-rascunho"
+GOOGLE_CLIENT_ID = ""
+GOOGLE_REDIRECT_URI = "http://localhost:8787/auth/google/callback"
+
+# Decisão de banco: driver HTTP do Neon (@neondatabase/serverless), sem Hyperdrive.
+# Cada requisição é uma chamada HTTP sem conexão persistente, então não consome o limite
+# de conexões do plano gratuito do Neon nem exige pool.
