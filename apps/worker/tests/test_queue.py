@@ -1,5 +1,4 @@
 import psycopg
-import pytest
 
 from app import queue
 from app.config import Settings
