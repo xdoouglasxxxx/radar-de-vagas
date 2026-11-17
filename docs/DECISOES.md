@@ -24,8 +24,10 @@ Decisões vigentes. Para mudar uma delas, o usuário pede e a mudança é regist
 | D18 | Uso exclusivamente pessoal (2026-11-16): sem freemium, cotas por plano, paywall, afiliados, métricas de produto, termos para terceiros ou múltiplos usuários | Escolha do usuário; reduz escopo |
 | D19 | Login Google OAuth restrito a um e-mail (allowlist no Wrangler); consentimento versionado e tela de termos removidos do fluxo; colunas `terms_*` ficam sem uso (migration `0002` inalterada, nenhuma coluna nova de consentimento) | Só o dono usa; evita `DROP COLUMN` |
 | D20 | Um único Worker serve o site estático e a API na mesma origem (Workers Static Assets, `workers.dev`); sem domínio próprio | Cookie `SameSite=Lax` funciona sem custo; elimina CORS |
-| D21 | Vitrine pública mantida completa, com um só dono (moderação = painel do dono); nunca exibe dados da Adzuna | Escolha do usuário; publicar é opt-in por seção, com e-mail e telefone mascarados por padrão |
+| D21 | (substituída por D23) Vitrine pública mantida completa, com um só dono (moderação = painel do dono); nunca exibe dados da Adzuna | Escolha do usuário; publicar é opt-in por seção, com e-mail e telefone mascarados por padrão |
 | D22 | Adzuna entra como fonte da Fase 1, só para uso pessoal (D13), com atribuição visível | D18 elimina o bloqueio comercial |
+| D23 | Substitui D21: a vitrine (E12) passa a ser opcional e fica por último; contato é só um link (LinkedIn ou e-mail) escolhido pelo dono, sem formulário, captcha, denúncia ou serviço externo; a decisão de publicar é tomada na hora; nenhum dado do CV entra no repositório | Escolha do usuário (2026-11-16) |
+| D24 | Mudança só de documentação precisa apenas do `juiz-escopo` no CP2; código continua passando pelos três juízes | Pedido do usuário (2026-11-16); "só documentação" = diff apenas com `.md` em `docs/`, `ROADMAP.md` e `README.md` |
 
 ## Gatilho de revisão
-Primeiro usuário externo, primeira cobrança ou primeiro recrutador interessado: revisar D02, D03, D06, D13, D18 a D22, os termos dos planos gratuitos e a LGPD (com apoio jurídico).
+Primeiro usuário externo, primeira cobrança ou primeiro recrutador interessado: revisar D02, D03, D06, D13, D18 a D23, os termos dos planos gratuitos e a LGPD (com apoio jurídico).

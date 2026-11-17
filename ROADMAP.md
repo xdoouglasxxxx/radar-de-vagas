@@ -5,23 +5,26 @@ O estado detalhado do momento fica em `docs/STATUS.md`. Cada etapa só fecha dep
 
 ## Visão geral
 
-| Etapa | Tema | Estado |
-|---|---|---|
-| E0 | Fundação: repositório, CI, Codespace, Neon de dev | [x] |
-| E1 | Fila e agendamento no Postgres | [x] |
-| E2 | Menor privilégio no banco (roles) | [ ] |
-| E3a | Login Google restrito ao dono; sem consentimento; apagar meus dados | [~] |
-| E3b | CI do TypeScript, lockfiles e correções de testes dos juízes | [ ] |
-| E4 | Mesma origem: um Worker serve o site estático e a API | [ ] |
-| E5 | Criptografia de envelope e armazenamento (R2) | [ ] |
-| E6 | Upload e leitura de CV (testes com dados fictícios) | [ ] |
-| E7 | Revisão e confirmação do perfil | [ ] |
-| E8 | Fontes de vagas, normalização e deduplicação | [ ] |
-| E9 | Embeddings e match preliminar | [ ] |
-| E10 | Explicação por IA com orçamento | [ ] |
-| E11 | Feed e detalhe da vaga | [ ] |
-| E12 | Vitrine pública (rascunho privado, publicar) | [ ] |
-| E13 | Operação: backup, consumo, deploy, runbook | [ ] |
+| Etapa | Tema | Estado | Caminho |
+|---|---|---|---|
+| E0 | Fundação: repositório, CI, Codespace, Neon de dev | [x] | Mínimo |
+| E1 | Fila e agendamento no Postgres | [x] | Mínimo |
+| E2 | Menor privilégio no banco (roles; atenção: da E5 em diante o worker lida com CV real usando a credencial do dono do banco) | [ ] | Recomendado |
+| E3a | Login Google restrito ao dono; sem consentimento; apagar meus dados | [~] | Mínimo |
+| E3b | CI do TypeScript, lockfiles e correções de testes dos juízes | [ ] | Mínimo |
+| E4 | Mesma origem: um Worker serve o site estático e a API | [ ] | Mínimo |
+| E5 | Criptografia de envelope e armazenamento (R2) | [ ] | Mínimo |
+| E6 | Upload e leitura de CV (testes com dados fictícios) | [ ] | Mínimo |
+| E7 | Revisão e confirmação do perfil | [ ] | Mínimo |
+| E8 | Fontes de vagas, normalização e deduplicação | [ ] | Mínimo |
+| E9 | Embeddings e match preliminar | [ ] | Mínimo |
+| E10 | Explicação por IA com orçamento | [ ] | Recomendado |
+| E11 | Feed e detalhe da vaga | [ ] | Mínimo |
+| E13 | Operação: backup, consumo, deploy, runbook | [ ] | Recomendado |
+| E12 | Vitrine pública (opcional, por último) | [ ] | Opcional |
+
+**Caminho mínimo até "radar funcionando para mim":** E3a, E3b, E4, E5, E6, E7, E8, E9 e E11 (E0 e E1 já feitas). **Recomendado:** E2 (roles), E10 (explicação por IA; sem ela o feed usa só o score preliminar) e E13 (backup e runbook). **Opcional:** E12. Nada foi cortado: a marcação só ordena a prioridade, e a ordem de execução continua sendo a do `docs/STATUS.md`.
+
 
 ---
 
@@ -105,11 +108,10 @@ O estado detalhado do momento fica em `docs/STATUS.md`. Cada etapa só fecha dep
 ## E11 — Feed e detalhe `[ ]`
 - **Entregas:** páginas estáticas que leem a API; faixas ≥85 / 70–84 / 50–69; estados vazio e carregando.
 
-## E12 — Vitrine pública `[ ]`
-- **Parada obrigatória:** captcha, envio de contato e limite de envios exigem serviço externo ou recurso novo; o plano da E12 precisa da aprovação do usuário antes do código.
-- **Mudança (D21):** mantida completa, mas com um só dono: "moderação" é o painel do dono, e o consentimento de publicação é o botão "Publicar". Dados da Adzuna nunca aparecem na vitrine (D13).
-- **Entregas:** rascunho privado, visibilidade por seção, publicar e despublicar, `noindex`, esquema público por lista de campos permitidos, contato intermediado com captcha e limite de envios, denúncia, PDF por folha de impressão.
-- **Aceite:** requisição anônima a perfil privado ou seção oculta não retorna dado nenhum (teste automatizado).
+## E12 — Vitrine pública `[ ]` (opcional, por último)
+- **Decisão (D23):** não é necessária para o radar funcionar. Só será feita se o dono decidir publicar, depois das demais etapas. Nenhum dado do CV do dono entra no repositório.
+- **Entregas (se for feita):** rascunho privado, visibilidade por seção, publicar e despublicar, `noindex`, esquema público por lista de campos permitidos, PDF por folha de impressão e **um único link de contato** (LinkedIn ou e-mail) que o dono escolhe na hora. Sem formulário, captcha, denúncia nem serviço externo.
+- **Aceite:** requisição anônima a perfil privado ou seção oculta não retorna dado nenhum (teste automatizado); e-mail e telefone mascarados por padrão; nenhum campo da Adzuna no esquema público (D13).
 
 ## E13 — Operação `[ ]`
 - **Entregas:** `pg_dump` semanal cifrado para o R2 com teste de restauração; medição das horas de computação do Neon; deploy documentado; runbook de incidentes.

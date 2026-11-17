@@ -45,7 +45,7 @@ Juízes nunca editam arquivos. O developer nunca aprova o próprio trabalho.
 
 ## Skills (em `.claude/skills/`)
 - `/etapa E<n>` — conduz o ciclo completo de uma etapa.
-- `/checkpoint` — roda os três juízes sobre o diff atual.
+- `/checkpoint` — roda os três juízes sobre o diff atual (mudança só de documentação, D24: apenas o `juiz-escopo`).
 - `/onde-estamos` — mostra onde estamos; `/onde-estamos atualizar` grava `docs/STATUS.md`.
 - `/pre-commit` — verificação de segredos e de escopo antes de commitar.
 - `nova-migration` — convenções de migration (carregada quando o assunto é esquema de banco).
