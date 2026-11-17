@@ -1,0 +1,32 @@
+name: audit
+
+# Vulnerabilidades nas dependências de produção. Fica fora dos checks obrigatórios:
+# um aviso novo no registry não deve travar um pull request que não tem relação com ele.
+on:
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1" # toda segunda-feira, 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      # O audit lê só o package-lock.json: não instala nada nem roda script de pacote.
+      - name: apps/auth
+        working-directory: apps/auth
+        run: npm audit --omit=dev --audit-level=high
+      - name: apps/web
+        if: ${{ !cancelled() }}
+        working-directory: apps/web
+        run: npm audit --omit=dev --audit-level=high

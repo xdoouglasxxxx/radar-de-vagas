@@ -10,6 +10,9 @@ async function makeToken(claims: Record<string, unknown>, tamper = false) {
     true,
     ["sign", "verify"],
   );
+  // O tipo de retorno é `CryptoKey | CryptoKeyPair`. RSA sempre gera um par; a checagem em
+  // tempo de execução estreita o tipo sem cast e falha alto se isso deixar de valer.
+  if (!("privateKey" in pair)) throw new Error("generateKey não devolveu um par de chaves");
   const enc = (o: unknown) => b64url(new TextEncoder().encode(JSON.stringify(o)));
   const h = enc({ alg: "RS256", kid: "k1" });
   const p = enc(claims);

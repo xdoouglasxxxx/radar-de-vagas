@@ -11,7 +11,7 @@ A tabela segue a ordem de execução, não a numeração.
 | E0 | Fundação: repositório, CI, Codespace, Neon de dev | [x] | Mínimo |
 | E1 | Fila e agendamento no Postgres | [x] | Mínimo |
 | E2 | Menor privilégio no banco (roles; atenção: da E5 em diante o worker lida com CV real usando a credencial do dono do banco) | [ ] | Recomendado |
-| CI-TS | Job de CI do TypeScript (branch `chore/ci-typescript`, antes da E3a) | [ ] | Mínimo |
+| CI-TS | Job de CI do TypeScript (branch `chore/ci-typescript`, antes da E3a) | [~] | Mínimo |
 | E3a | Login Google restrito ao dono; sem consentimento; apagar meus dados | [~] | Mínimo |
 | E3b | Correções de testes e robustez do login | [ ] | Mínimo |
 | E4 | Mesma origem: um Worker serve o site estático e a API | [ ] | Mínimo |
@@ -45,12 +45,14 @@ A tabela segue a ordem de execução, não a numeração.
 - **Ação do usuário:** criar os roles no Neon e atualizar os secrets.
 - **Pergunta de verificação:** o que um invasor conseguiria fazer com a senha de cada role?
 
-## CI-TS — Job de CI do TypeScript `[ ]`
+## CI-TS — Job de CI do TypeScript `[~]`
 - **Branch:** `chore/ci-typescript`, antes da E3a.
-- **Entregas:** `ci.yml` com um job para `apps/auth` e `apps/web` (`npm ci`, `typecheck`, testes do auth, `next build`), usando `package-lock.json`.
-- **Pré-requisito do dono:** gerar os `package-lock.json` de `apps/auth` e `apps/web` no Codespace.
-- **Se o CI ficar vermelho:** o código atual do auth nunca foi executado. Os testes e tipos que falharem são corrigidos nesta mesma branch, antes de começar a E3a (decisão do dono).
-- **Aceite:** CI verde, sem testes pulados que deveriam rodar.
+- **Entregas:** `ci.yml` com os jobs `auth` (`npm ci`, `typecheck`, testes, empacotamento do Worker sem publicar) e `web` (`npm ci`, `next build`, `typecheck`), usando `package-lock.json` e Node 24 (D29); telemetria do Next e do Wrangler desativada no CI. O web ainda não tem testes. O empacotamento só exibe o tamanho do bundle: a medição que vale para o limite de 3 MiB é a da E4.
+- **Audit:** workflow `audit.yml`, job `audit`, com `npm audit --omit=dev --audit-level=high` nos dois apps, nos pull requests e uma vez por semana. Fica fora dos checks obrigatórios; se ficar vermelho, o dono decide a atualização.
+- **Feito pelo dono no Codespace (Node 24.22.3):** lockfiles gerados; dependências atualizadas por causa do `npm audit` (D29); `npm audit` com 0 vulnerabilidades nos dois apps.
+- **Primeira execução dos testes de `apps/auth`:** 32 testes passaram no Codespace (23 em `app.test.ts` e 9 em `auth.test.ts`). O `typecheck` do auth acusou 2 erros em `test/auth.test.ts`, corrigidos nesta branch; a correção ainda não foi executada. No web, `typecheck` e `build` passaram.
+- **Se o CI ficar vermelho:** os testes e tipos que falharem são corrigidos nesta mesma branch, antes de começar a E3a (decisão do dono).
+- **Aceite:** CI verde nos jobs `worker`, `auth` e `web`, sem testes pulados que deveriam rodar.
 
 ## E3a — Login restrito ao dono `[~]`
 - **Mudança (D18, D19):** uso pessoal. Só o e-mail do dono entra (allowlist em variável do Wrangler). Consentimento versionado e termos saem do fluxo; as colunas `terms_*` ficam sem uso (não há `DROP COLUMN`).
@@ -67,7 +69,7 @@ A tabela segue a ordem de execução, não a numeração.
 - **Nota:** o job de CI do TypeScript e os lockfiles estão na etapa CI-TS; os testes de hash, cookie e exclusão estão no aceite da E3a.
 - **Entregas:**
   - testes dos juízes: consistência do `state` em `start`, `verifyIdToken` (alg diferente de RS256, kid desconhecido, malformado, claims ausentes, mensagens específicas), reentrada do mesmo usuário, PKCE com verifier errado;
-  - `readFileSync` no lugar de `?raw`; PGlite criado uma vez; `engines` Node 20+;
+  - `readFileSync` no lugar de `?raw`; PGlite criado uma vez; `engines` Node 24 (D29);
   - tratar falha do banco no callback e `?error=` do Google; `Vary: Origin` sempre; `no-store` no preflight;
   - limpeza de sessões expiradas ou revogadas (job do worker, `DELETE` com `WHERE`, em migration ou handler revisado) e índice em `expires_at`;
   - README do fluxo OAuth com a resposta da pergunta de verificação.

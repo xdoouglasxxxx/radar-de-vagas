@@ -2,7 +2,7 @@
   "name": "radar-de-vagas",
   "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
   "features": {
-    "ghcr.io/devcontainers/features/node:1": { "version": "20" }
+    "ghcr.io/devcontainers/features/node:1": { "version": "24" }
   },
   "postCreateCommand": "pip install -e './apps/worker[dev]'",
   "customizations": {
