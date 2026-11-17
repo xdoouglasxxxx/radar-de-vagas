@@ -10,10 +10,11 @@ O estado detalhado do momento fica em `docs/STATUS.md`. Cada etapa só fecha dep
 | E0 | Fundação: repositório, CI, Codespace, Neon de dev | [x] |
 | E1 | Fila e agendamento no Postgres | [x] |
 | E2 | Menor privilégio no banco (roles) | [ ] |
-| E3 | Login com Google (OAuth + PKCE) e sessões | [~] |
-| E4 | Consentimento versionado e exclusão de conta | [~] |
+| E3a | Login Google restrito ao dono; sem consentimento; apagar meus dados | [~] |
+| E3b | CI do TypeScript, lockfiles e correções de testes dos juízes | [ ] |
+| E4 | Mesma origem: um Worker serve o site estático e a API | [ ] |
 | E5 | Criptografia de envelope e armazenamento (R2) | [ ] |
-| E6 | Upload e leitura de CV (dados fictícios) | [ ] |
+| E6 | Upload e leitura de CV (testes com dados fictícios) | [ ] |
 | E7 | Revisão e confirmação do perfil | [ ] |
 | E8 | Fontes de vagas, normalização e deduplicação | [ ] |
 | E9 | Embeddings e match preliminar | [ ] |
@@ -40,28 +41,44 @@ O estado detalhado do momento fica em `docs/STATUS.md`. Cada etapa só fecha dep
 - **Ação do usuário:** criar os roles no Neon e atualizar os secrets.
 - **Pergunta de verificação:** o que um invasor conseguiria fazer com a senha de cada role?
 
-## E3 — Login com Google e sessões `[~]`
-- **Situação:** código de `apps/auth`, `apps/web` e a migration `0002` estão em `main`, mas **sem revisão dos juízes e sem testes no CI**.
-- **Entregas:** testes de `apps/auth` rodando no CI; revisão dos três juízes; correções; README do fluxo OAuth.
-- **Aceite:** state inválido, code reutilizado, `aud`/`iss` errados e token expirado falham com 4xx; sessão revogada ou expirada não autentica; cookie `httpOnly`, `Secure`, `SameSite=Lax`; só o hash do token no banco; nenhum token do Google armazenado.
-- **Ação do usuário:** criar o cliente OAuth no Google Cloud (escopos `openid email profile`), cadastrar redirect URIs e guardar o secret no Wrangler.
+## E3a — Login restrito ao dono `[~]`
+- **Mudança (D18, D19):** uso pessoal. Só o e-mail do dono entra (allowlist em variável do Wrangler). Consentimento versionado e termos saem do fluxo; as colunas `terms_*` ficam sem uso (não há `DROP COLUMN`).
+- **Entregas:**
+  - allowlist de um e-mail no callback (qualquer outro recebe 403 e nenhuma linha é criada em `users`). Regras: só vale com `email_verified` verdadeiro; comparação sem diferenciar maiúsculas e minúsculas; o e-mail vem de variável do Wrangler (segredo), nunca de `wrangler.toml`, testes ou README (repositório público, D14);
+  - remover `consent_pending`, `/api/consent`, a tela de consentimento e as referências a `terms_*` no código (a migration `0002` não muda e nenhuma coluna nova é criada);
+  - tela e rota de "apagar meus dados" (exclusão real, com confirmação); a E5 estende a exclusão aos objetos e chaves do R2.
+- **Aceite:** state inválido, code reutilizado, `aud`/`iss` errados e token expirado falham com 4xx; e-mail fora da allowlist e `email_verified=false` recebem 403 sem criar usuário (testes); sessão revogada ou expirada não autentica; cookie `httpOnly`, `Secure`, `SameSite=Lax`; só o hash do token no banco; nenhum token do Google armazenado.
+- **Ação do usuário:** criar o cliente OAuth no Google Cloud (escopos `openid email profile`), cadastrar redirect URIs, guardar o secret e o e-mail permitido no Wrangler.
 - **Pergunta de verificação:** que ataque o `state` evita, e que ataque o PKCE evita?
 
-## E4 — Consentimento e exclusão de conta `[~]`
-- **Situação:** tela de consentimento existe em `apps/web`; falta validar o fluxo completo.
-- **Entregas:** versão do termo registrada; upload bloqueado enquanto `consent_pending`; exclusão real de conta e sessões.
-- **Aceite:** teste cobre aceite, bloqueio sem aceite e exclusão com remoção dos dados.
-- **Pergunta de verificação:** por que o consentimento de leitura do CV é separado do de publicação da vitrine?
+## E3b — CI do TypeScript e correções de testes `[ ]`
+- **Entregas:**
+  - job de CI para `apps/auth` e `apps/web` (`typecheck`, testes, `next build`), com `package-lock.json` e `npm ci`;
+  - testes dos juízes: hash exato do token, atributos do cookie e consistência do `state` em `start`, `verifyIdToken` (alg diferente de RS256, kid desconhecido, malformado, claims ausentes, mensagens específicas), reentrada do mesmo usuário, login após exclusão, `Max-Age=0` no logout, PKCE com verifier errado;
+  - `readFileSync` no lugar de `?raw`; PGlite criado uma vez; `engines` Node 20+;
+  - tratar falha do banco no callback e `?error=` do Google; `Vary: Origin` sempre; `no-store` no preflight;
+  - limpeza de sessões expiradas ou revogadas (job do worker, `DELETE` com `WHERE`, em migration ou handler revisado) e índice em `expires_at`;
+  - README do fluxo OAuth com a resposta da pergunta de verificação.
+- **Aceite:** CI verde com os testes do TypeScript, sem testes pulados.
+
+## E4 — Mesma origem `[ ]`
+- **Objetivo (D20):** o cookie `SameSite=Lax` funcionar em produção sem domínio próprio.
+- **Entregas:** `apps/auth` passa a servir o site estático de `apps/web` (Workers Static Assets) e as rotas `/auth/*` e `/api/*` na mesma origem; CORS deixa de ser necessário; CSP final sem placeholder; `[env.production]` explícito no `wrangler.toml`; falha de build se faltar `NEXT_PUBLIC_AUTH_URL` (ou URL relativa).
+- **Aceite:** teste de roteamento (estático vs API); tamanho do bundle (3 MiB) medido; as rotas de API não fazem trabalho pesado e os arquivos estáticos não passam pelo código do Worker (10 ms de CPU).
+- **Riscos não verificados:** limites e suporte dos assets do Workers Static Assets no plano gratuito; limite de conexões do Neon com login e API num só Worker (verificar antes da E4). Plano de reversão: `wrangler rollback` (não verificado).
+- **Ação do usuário:** `wrangler deploy`, definir a allowlist e os secrets no Wrangler e conferência do login no navegador (nenhum juiz consegue verificar).
+- **Pergunta de verificação:** por que o cookie não era enviado entre `pages.dev` e `workers.dev`?
 
 ## E5 — Criptografia de envelope e R2 `[ ]`
 - **Objetivo:** arquivos cifrados pela aplicação antes de irem ao armazenamento.
 - **Entregas:** chave por arquivo protegida por chave-mestra; rotação sem regravar arquivos; cliente R2 (S3-compatível) com implementação falsa para testes.
-- **Aceite:** teste de ida e volta, teste de rotação, teste de falha com chave errada; chave-mestra nunca em log.
+- **Aceite:** teste de ida e volta, teste de rotação, teste de falha com chave errada; chave-mestra nunca em log; "apagar meus dados" remove os objetos e as chaves do R2.
 - **Ação do usuário:** criar o bucket de dev e guardar uma cópia offline da chave-mestra.
 - **Pergunta de verificação:** o que se perde se a chave-mestra sumir, e o que a rotação protege?
 
 ## E6 — Upload e leitura de CV `[ ]`
-- **Entregas:** validação de tipo real e tamanho; extração de texto nativo (PDF, DOCX, TXT); mascaramento de CPF, telefone, e-mail, endereço e data de nascimento antes de qualquer envio à IA; parser com schema validado, repetição limitada e confiança por campo; jobs assíncronos com estados visíveis.
+- **Mudança (D19):** sem tela de consentimento; o upload exige sessão do dono (e-mail da allowlist), com teste para usuário fora dela.
+- **Entregas:** validação de tipo real e tamanho; extração de texto nativo (PDF, DOCX, TXT); mascaramento de CPF, telefone, e-mail, endereço e data de nascimento antes de qualquer envio à IA (mantido: reduz o que sai para a API); parser com schema validado, repetição limitada e confiança por campo; jobs assíncronos com estados visíveis.
 - **Fora do escopo inicial:** OCR e antivírus (dependem de memória do runner, ainda não verificada).
 - **Aceite:** suíte com CVs fictícios (simples, duas colunas, tabela, inglês); campos ausentes viram `null`; nenhum dado mascarado chega ao cliente de IA (teste com cliente falso).
 - **Pergunta de verificação:** por que mascarar antes de enviar, e não depois de receber?
@@ -71,9 +88,9 @@ O estado detalhado do momento fica em `docs/STATUS.md`. Cada etapa só fecha dep
 - **Aceite:** nada alimenta o radar antes da confirmação.
 
 ## E8 — Fontes de vagas `[ ]`
-- **Entregas:** interface `Connector`; conectores Remote OK e Greenhouse/Lever; normalização; deduplicação; campo de escopo de licença por fonte; retenção de 30 a 60 dias.
+- **Entregas:** interface `Connector`; conectores Adzuna (D13, uso pessoal; atribuição visível), Remote OK e Greenhouse/Lever; normalização; deduplicação; campo de escopo de licença por fonte; retenção de 30 a 60 dias.
 - **Antes de codar:** conferir os termos de cada fonte e registrar em `docs/DECISOES.md`.
-- **Aceite:** testes com respostas gravadas fictícias; a mesma vaga em duas fontes vira um registro.
+- **Aceite:** testes com respostas gravadas fictícias; a mesma vaga em duas fontes vira um registro; nenhum campo da Adzuna chega ao esquema público (usa o escopo de licença por fonte).
 - **Atenção:** a tabela de vagas não pode se chamar `jobs` (nome já usado pela fila).
 
 ## E9 — Embeddings e match preliminar `[ ]`
@@ -89,7 +106,9 @@ O estado detalhado do momento fica em `docs/STATUS.md`. Cada etapa só fecha dep
 - **Entregas:** páginas estáticas que leem a API; faixas ≥85 / 70–84 / 50–69; estados vazio e carregando.
 
 ## E12 — Vitrine pública `[ ]`
-- **Entregas:** rascunho privado, visibilidade por seção, publicar e despublicar, `noindex`, esquema público por lista de campos permitidos.
+- **Parada obrigatória:** captcha, envio de contato e limite de envios exigem serviço externo ou recurso novo; o plano da E12 precisa da aprovação do usuário antes do código.
+- **Mudança (D21):** mantida completa, mas com um só dono: "moderação" é o painel do dono, e o consentimento de publicação é o botão "Publicar". Dados da Adzuna nunca aparecem na vitrine (D13).
+- **Entregas:** rascunho privado, visibilidade por seção, publicar e despublicar, `noindex`, esquema público por lista de campos permitidos, contato intermediado com captcha e limite de envios, denúncia, PDF por folha de impressão.
 - **Aceite:** requisição anônima a perfil privado ou seção oculta não retorna dado nenhum (teste automatizado).
 
 ## E13 — Operação `[ ]`
@@ -103,3 +122,6 @@ O estado detalhado do momento fica em `docs/STATUS.md`. Cada etapa só fecha dep
 - Memória dos runners gratuitos do GitHub para embeddings.
 - Termos de uso dos planos gratuitos (Cloudflare, Neon, R2, GitHub) antes de qualquer usuário externo.
 - Conexão do Worker ao Neon dentro do limite de conexões do plano gratuito.
+
+## Fora de escopo (uso pessoal, D18)
+Plano freemium, cotas por plano, paywall e lista "quero assinar"; cursos com afiliados; termos de uso e revisão jurídica para terceiros; métricas de produto; múltiplos usuários. Reabrir só se o projeto deixar de ser pessoal (gatilho de revisão em `docs/DECISOES.md`).

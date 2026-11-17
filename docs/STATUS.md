@@ -1,18 +1,20 @@
 # Onde estamos
 
-Atualizado em: 2026-11-12
+Atualizado em: 2026-11-16
 
 ## Agora
-- **Etapa atual:** E3 — Login com Google e sessões (`[~]`).
+- **Etapa atual:** E3 — Login restrito ao dono e correções (`[~]`). Projeto passou a ser de uso pessoal (D18 a D22).
 - **Último commit validado:** `adaa65b` (E1: 8 testes passando no Codespace e no CI).
-- **Situação:** o código de `apps/auth` e `apps/web` está em `main` sem revisão dos juízes e sem testes no CI.
+- **Situação:** `/checkpoint` feito em 2026-11-16 (segurança e escopo: aprovado com ressalvas; qualidade: reprovado). O código ainda está em `main` sem testes executados no CI. O plano pessoal foi aprovado com ressalvas pelo `juiz-escopo`, com 3 decisões do usuário pendentes (ver abaixo).
 
 ## Próxima ação
-1. Rodar `/checkpoint` sobre `apps/auth`, `apps/web` e a migration `0002`.
-2. Incluir os testes de `apps/auth` no `ci.yml` (pull request).
-3. Corrigir o que os juízes apontarem e fechar a E3 com os checkpoints.
+1. `/checkpoint` da E3 feito em 2026-11-16: segurança e escopo aprovaram com ressalvas; qualidade reprovou (cookie entre sites e testes fracos). Achados incorporados à E3 e à E4 do ROADMAP.
+2. Implementar a E3 (allowlist, CI do TypeScript, correções dos testes) e depois a E4 (mesma origem).
+3. Novo `/checkpoint` e pull request.
 
 ## Bloqueios e ações do usuário
+- Decidir E12: contato intermediado com captcha (serviço externo) ou link de e-mail simples; e confirmar que publicar CV com contato mascarado, com repositório público, é decisão sua.
+- Definir a allowlist (e-mail) como secret do Wrangler e fazer o `wrangler deploy` da E4.
 - Criar o cliente OAuth no Google Cloud e cadastrar as redirect URIs.
 - Ativar proteção da branch `main` (pull request obrigatório e CI verde).
 - Criar o arquivo `.env.example` à mão (a escrita em `.env*` é bloqueada para o Claude).
