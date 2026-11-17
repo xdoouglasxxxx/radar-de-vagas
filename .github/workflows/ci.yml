@@ -23,3 +23,53 @@ jobs:
       - run: pytest apps/worker
         env:
           TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+
+  # Jobs do TypeScript: não recebem nenhum secret. Node 24 é a mesma linha do devcontainer (D29).
+  # `npm ci` instala exatamente o que está no package-lock.json e falha se ele divergir do
+  # package.json; `npm install` poderia resolver versões novas e mudar o resultado.
+  # O `npm audit` roda em workflow próprio (audit.yml), fora dos checks obrigatórios.
+  auth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: apps/auth
+    env:
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/auth/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      # Empacota o Worker sem publicar (não usa credencial) e mostra o tamanho do bundle.
+      - run: npm run build
+
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: apps/web
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      # O build vem antes do typecheck: ele gera next-env.d.ts e .next/types, que o
+      # tsconfig inclui e que não são versionados.
+      - run: npm run build
+      - run: npm run typecheck

@@ -29,4 +29,4 @@ Toda tarefa passa por estes portões, em ordem. Um portão reprovado devolve a t
 O Claude para e pergunta quando a tarefa exigir: segredo ou credencial, deploy, recurso em nuvem, mudança em `main`, migration destrutiva, dependência nova não prevista no plano, ou qualquer limite, preço ou termo não verificado.
 
 ## Proteção da branch (ação do usuário, uma vez)
-Em **Settings > Branches**, proteger `main`: exigir pull request e exigir o check `ci` verde antes do merge.
+Em **Settings > Branches**, proteger `main`: exigir pull request e exigir os checks `worker`, `auth` e `web` verdes antes do merge. O check `audit` não é obrigatório.

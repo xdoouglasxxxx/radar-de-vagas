@@ -29,6 +29,10 @@ node_modules/
 .wrangler/
 .dev.vars
 .next/
+apps/auth/dist/
+apps/web/next-env.d.ts
+apps/web/out/
+apps/web/tsconfig.tsbuildinfo
 
 # Editor / SO
 .vscode/*
