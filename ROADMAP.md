@@ -2,6 +2,7 @@
 
 Legenda: `[x]` concluída e validada · `[~]` em andamento ou escrita sem validação · `[ ]` não iniciada.
 O estado detalhado do momento fica em `docs/STATUS.md`. Cada etapa só fecha depois dos checkpoints de `docs/CHECKPOINTS.md`.
+A tabela segue a ordem de execução, não a numeração.
 
 ## Visão geral
 
@@ -25,7 +26,6 @@ O estado detalhado do momento fica em `docs/STATUS.md`. Cada etapa só fecha dep
 | E12 | Vitrine pública (opcional, por último) | [ ] | Opcional |
 
 **Caminho mínimo até "radar funcionando para mim":** CI-TS, E3a, E3b, E4, E5, E6, E7, E8 (Adzuna), E9 e E11 (E0 e E1 já feitas). **Recomendado:** E2 (roles), E10 (explicação por IA; sem ela o feed usa só o score preliminar) e E13 (backup e runbook). **Opcional:** E12. Nada foi cortado: a marcação só ordena a prioridade, e a ordem de execução continua sendo a do `docs/STATUS.md`.
-
 
 ---
 
@@ -59,13 +59,13 @@ O estado detalhado do momento fica em `docs/STATUS.md`. Cada etapa só fecha dep
   - remover `consent_pending`, `/api/consent`, a tela de consentimento e as referências a `terms_*` no código (a migration `0002` não muda e nenhuma coluna nova é criada);
   - tela e rota de "apagar meus dados" (exclusão real, com confirmação); a E5 estende a exclusão aos objetos e chaves do R2.
 - **Aceite:** state inválido, code reutilizado, `aud`/`iss` errados e token expirado falham com 4xx; e-mail fora da allowlist e `email_verified=false` recebem 403 sem criar usuário (testes); sessão revogada ou expirada não autentica; teste do atributo do cookie (`httpOnly`, `Secure`, `SameSite=Lax`) e de `Max-Age=0` no logout; teste do hash exato do token no banco (e do token fora dele); nenhum token do Google armazenado; teste de que "apagar meus dados" remove usuário e sessões e de que o login depois cria usuário novo.
-- **Aceite da E3a:** somente os testes automatizados no CI (sem deploy). Motivo: com `apps/web` e `apps/auth` em origens diferentes em produção, o cookie `SameSite=Lax` não é enviado no `fetch` entre sites; o login de ponta a ponta só funciona depois da E4 (mesma origem). As ações do usuário (cliente OAuth, redirect URI, secrets e deploy) estão na E4.
+- **Aceite da E3a:** somente os testes automatizados no CI (sem deploy). A etapa continua `[~]` até a E4 validar o login no navegador. Motivo: com `apps/web` e `apps/auth` em origens diferentes em produção, o cookie `SameSite=Lax` não é enviado no `fetch` entre sites; o login de ponta a ponta só funciona depois da E4 (mesma origem). As ações do usuário (cliente OAuth, redirect URI, secrets e deploy) estão na E4.
 - **Riscos aceitos (D26):** e-mail do Google reciclado (o dono usa um Gmail pessoal); sessões criadas antes da allowlist valem até expirar (checagem na E6).
 - **Pergunta de verificação:** que ataque o `state` evita, e que ataque o PKCE evita?
 
 ## E3b — Correções de testes e robustez do login `[ ]`
+- **Nota:** o job de CI do TypeScript e os lockfiles estão na etapa CI-TS; os testes de hash, cookie e exclusão estão no aceite da E3a.
 - **Entregas:**
-  - o job de CI do TypeScript e os lockfiles estão na etapa CI-TS; os testes de hash, cookie e exclusão estão no aceite da E3a;
   - testes dos juízes: consistência do `state` em `start`, `verifyIdToken` (alg diferente de RS256, kid desconhecido, malformado, claims ausentes, mensagens específicas), reentrada do mesmo usuário, PKCE com verifier errado;
   - `readFileSync` no lugar de `?raw`; PGlite criado uma vez; `engines` Node 20+;
   - tratar falha do banco no callback e `?error=` do Google; `Vary: Origin` sempre; `no-store` no preflight;

@@ -10,8 +10,8 @@ O objetivo é aprender a arquitetura, então clareza e testes valem mais que vel
 
 ## Arquitetura vigente
 - `apps/worker` — Python 3.12 + psycopg. Fila em Postgres (`SKIP LOCKED`), agendamento, handlers.
-- `apps/auth` — Cloudflare Worker em TypeScript. Login Google OAuth (PKCE), sessões, consentimento.
-- `apps/web` — Next.js com `output: 'export'` (site estático). Sem renderização no servidor.
+- `apps/auth` — Cloudflare Worker em TypeScript. Login Google OAuth (PKCE) restrito a um e-mail (allowlist, D19) e sessões. A partir da E4 (D20) serve também o build estático de `apps/web`, na mesma origem.
+- `apps/web` — Next.js com `output: 'export'` (site estático, servido pelo Worker de `apps/auth` a partir da E4). Sem renderização no servidor.
 - `db/migrations` — SQL versionado (`NNNN_descricao.sql`), aplicado com `python -m app.main --migrate`.
 - Banco: Neon (Postgres + pgvector). Dev e produção são projetos separados.
 - Execução: GitHub Actions roda `python -m app.main --once` a cada 15 minutos.
