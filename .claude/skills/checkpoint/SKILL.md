@@ -10,7 +10,7 @@ disable-model-invocation: true
 Alvo: $ARGUMENTS
 
 1. Se nenhum caminho foi informado, o alvo é `git diff main...HEAD`. Se a branch atual for `main` e não houver diff, peça os caminhos ao usuário.
-2. Acione os subagentes `juiz-seguranca`, `juiz-qualidade` e `juiz-escopo` com o mesmo alvo.
+2. Acione os subagentes `juiz-seguranca`, `juiz-qualidade` e `juiz-escopo` com o mesmo alvo. Exceção (D24): se o diff contiver somente arquivos `.md` em `docs/`, `ROADMAP.md` ou `README.md`, acione apenas o `juiz-escopo`.
 3. Consolide em uma tabela: juiz, veredito, número de achados por severidade.
 4. Liste todos os achados bloqueantes e importantes na íntegra, com arquivo e linha.
 5. Diga o resultado do portão CP2: passa só se nenhum juiz reprovou e não há achado bloqueante.

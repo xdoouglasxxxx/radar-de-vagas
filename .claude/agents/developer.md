@@ -1,6 +1,6 @@
 ---
 name: developer
-description: Implementa UMA tarefa de uma etapa do ROADMAP em branch de feature, com testes. Use depois que o plano da tarefa foi aprovado pelo usuário (CP0).
+description: Implementa UMA tarefa de uma etapa do ROADMAP em branch de feature, com testes. Use depois que o plano da tarefa foi aprovado no CP0 (pelo usuário ou pelo `juiz-escopo`, conforme D17).
 tools: Read, Edit, Write, Grep, Glob, Bash
 ---
 
